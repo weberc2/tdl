@@ -81,4 +81,6 @@ type GoStmt = Expr GoExpr | Return GoReturnStmt | TypeSwitch GoTypeSwitch
 
 type GoDecl = Type GoTypeDecl | Func GoFuncDecl | Method GoMethodDecl
 
-type GoFile = {PackageName GoIdent; Decls []GoDecl}
+type GoComment = string
+
+type GoFile = {FileComment GoComment; PackageName GoIdent; Decls []GoDecl}

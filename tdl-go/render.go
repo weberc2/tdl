@@ -241,13 +241,48 @@ func (gd GoDecl) Render(indent int) string {
 	return result
 }
 
+func (gc GoComment) Render(indent int) string {
+	ind := strings.Repeat(indentString, indent)
+	commentPrefix := "// "
+	// copied and modified from
+	// https://gist.github.com/kennwhite/306317d81ab4a885a965e25aa835b8ef
+	wordWrap := func(text string, lineWidth int) string {
+		lineWidth = lineWidth - len([]rune(ind)) - len([]rune(commentPrefix))
+		words := strings.Fields(strings.TrimSpace(text))
+		if len(words) == 0 {
+			return text
+		}
+		wrapped := words[0]
+		spaceLeft := lineWidth - len(wrapped)
+		for _, word := range words[1:] {
+			if len(word)+1 > spaceLeft {
+				wrapped += "\n" + commentPrefix + ind + word
+				spaceLeft = lineWidth - len(word)
+			} else {
+				wrapped += " " + word
+				spaceLeft -= 1 + len(word)
+			}
+		}
+
+		return wrapped
+	}
+
+	return wordWrap(commentPrefix+string(gc), 80)
+}
+
 func (gf GoFile) Render() string {
 	declStrings := make([]string, len(gf.Decls))
 	for i, decl := range gf.Decls {
 		declStrings[i] = decl.Render(0)
 	}
 	return strings.Join(
-		append([]string{"package " + string(gf.PackageName)}, declStrings...),
+		append(
+			[]string{
+				gf.FileComment.Render(0),
+				"package " + string(gf.PackageName),
+			},
+			declStrings...,
+		),
 		"\n\n",
 	)
 }

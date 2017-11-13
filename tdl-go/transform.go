@@ -297,5 +297,9 @@ func (f File) ToGo() GoFile {
 	for _, typeDecl := range f.TypeDecls {
 		decls = append(decls, typeDecl.GoDecls()...)
 	}
-	return GoFile{PackageName: GoIdent(f.PackageName), Decls: decls}
+	return GoFile{
+		FileComment: "This file is generated. Do not modify.",
+		PackageName: GoIdent(f.PackageName),
+		Decls:       decls,
+	}
 }
