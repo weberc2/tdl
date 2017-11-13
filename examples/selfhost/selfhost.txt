@@ -1,0 +1,84 @@
+package main
+
+type Ident = string
+
+type Field = {Name Ident; Type Type}
+
+type Enum = []Field
+
+type Struct = []Field
+
+type Tuple = []Type
+
+type Pointer = {Type Type}
+
+type Slice = {Type Type}
+
+type Type = Ident Ident
+    | Enum Enum
+    | Struct Struct
+    | Tuple Tuple
+    | Pointer Pointer
+    | Slice Slice
+
+type TypeDecl = {Name Ident; Type Type}
+
+type File = {PackageName Ident; TypeDecls []TypeDecl}
+
+type GoIdent = string
+
+type GoPair = {Name GoIdent; Value GoExpr}
+
+type GoCase = {Expr GoExpr; Stmts []GoStmt}
+
+type GoTypeSwitch = {Assignment GoPair; Cases []GoCase}
+
+type GoField = {Name GoIdent; Type GoType}
+
+type GoFuncType = {Args []GoField; Return []GoField}
+
+type GoInterfaceField = {Name GoIdent; Signature GoFuncType}
+
+type GoMethodSpec = {Name GoIdent; Recv GoType; Signature GoFuncType}
+
+type GoStruct = []GoField
+
+type GoInterface = []GoInterfaceField
+
+type GoPointer = {Type GoType}
+
+type GoSlice = {Type GoType}
+
+type GoBlock = []GoStmt
+
+type GoIntLit = int
+
+type GoStructLit = {Type GoType; Fields []GoPair}
+
+type GoCallExpr = {Fn GoExpr; Args []GoExpr}
+
+type GoTypeDecl = {Name GoIdent; Type GoType}
+
+type GoFuncDecl = {Name GoIdent; Signature GoFuncType; Body GoBlock}
+
+type GoMethodDecl = {Signature GoMethodSpec; Body GoBlock}
+
+type GoReturnStmt = []GoExpr
+
+type GoType = Ident GoIdent
+    | Func GoFuncType
+    | Struct GoStruct
+    | Interface GoInterface
+    | Pointer GoPointer
+    | Slice GoSlice
+
+type GoExpr = Ident GoIdent
+    | IntLit GoIntLit
+    | StructLit GoStructLit
+    | Call GoCallExpr
+
+type GoStmt = Expr GoExpr | Return GoReturnStmt | TypeSwitch GoTypeSwitch
+
+type GoDecl = Type GoTypeDecl | Func GoFuncDecl | Method GoMethodDecl
+
+type GoFile = {PackageName GoIdent; Decls []GoDecl}

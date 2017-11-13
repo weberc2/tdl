@@ -1,0 +1,10 @@
+package main
+
+type Field = {Name string; Value JSON}
+
+type JSON = Array []JSON
+    | Object []Field
+    | String string
+    | Number float64
+    | Boolean bool
+    | Null ()

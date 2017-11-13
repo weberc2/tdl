@@ -1,0 +1,1 @@
+type CmpOp = Eq () | Ne () | Gt () | Lt () | Ge () | Le ()
