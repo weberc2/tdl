@@ -26,6 +26,8 @@ func (i *Ident) EqualASTNode(other ASTNode) bool {
 	return ok && *i == *otherIdent
 }
 
+func (i *Ident) Name() string { return "IDENT" }
+
 func (f *Field) Parser() Parser {
 	// create a temp for the field name, since we don't want to modify the
 	// field in the case where we successfully parse the field name but then
@@ -204,6 +206,10 @@ func (senp sideEffectNodeParser) Parse(input Input) (Input, error) {
 	}
 	senp.sideEffect()
 	return rest, nil
+}
+
+func (senp sideEffectNodeParser) Name() string {
+	return senp.node.Parser().Name()
 }
 
 func (t *Type) Parser() Parser {

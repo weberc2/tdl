@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"unicode"
 	"unicode/utf8"
 )
@@ -38,6 +39,7 @@ func (i Input) String() string { return string(i.Source[i.Offset:]) }
 
 type Parser interface {
 	Parse(input Input) (Input, error)
+	Name() string
 }
 
 type RuneLit rune
@@ -52,6 +54,10 @@ func (rl RuneLit) Parse(input Input) (Input, error) {
 		)
 	}
 	return rest, nil
+}
+
+func (rl RuneLit) Name() string {
+	return "RuneLit['" + string(rl) + "']"
 }
 
 type StringLit string
@@ -72,6 +78,10 @@ func (sl StringLit) Parse(input Input) (Input, error) {
 	return input, nil
 }
 
+func (sl StringLit) Name() string {
+	return "StringLit[\"" + string(sl) + "\"]"
+}
+
 type UnicodeClass struct {
 	ClassName  string
 	RangeTable *unicode.RangeTable
@@ -87,6 +97,10 @@ func (uc UnicodeClass) Parse(input Input) (Input, error) {
 		uc.ClassName,
 		input.Take(20),
 	)
+}
+
+func (uc UnicodeClass) Name() string {
+	return "UnicodeClass[" + uc.ClassName + "]"
 }
 
 var (
@@ -109,6 +123,14 @@ func (s Seq) Parse(input Input) (Input, error) {
 	return input, nil
 }
 
+func (s Seq) Name() string {
+	parserNames := make([]string, len(s))
+	for i, parser := range s {
+		parserNames[i] = parser.Name()
+	}
+	return "Seq[" + strings.Join(parserNames, ", ") + "]"
+}
+
 type Any []Parser
 
 func (a Any) Parse(input Input) (Input, error) {
@@ -120,6 +142,29 @@ func (a Any) Parse(input Input) (Input, error) {
 		return rest, nil
 	}
 	return Input{}, fmt.Errorf("Failed to match '%s...'", input.Take(20))
+}
+
+func (a Any) Name() string {
+	parserNames := make([]string, len(a))
+	for i, parser := range a {
+		parserNames[i] = parser.Name()
+	}
+	return "Any[" + strings.Join(parserNames, ", ") + "]"
+}
+
+type Not struct {
+	Parser
+}
+
+func (n Not) Parse(input Input) (Input, error) {
+	if _, err := n.Parser.Parse(input); err != nil {
+		return input, nil
+	}
+	return Input{}, fmt.Errorf("Matched %s", n.Name())
+}
+
+func (n Not) Name() string {
+	return "Not[" + n.Parser.Name() + "]"
 }
 
 type Repeat struct {
@@ -136,12 +181,20 @@ func (r Repeat) Parse(input Input) (Input, error) {
 	}
 }
 
+func (r Repeat) Name() string {
+	return "Repeat[" + r.Parser.Name() + "]"
+}
+
 type OneOrMore struct {
 	Parser
 }
 
 func (oom OneOrMore) Parse(input Input) (Input, error) {
 	return Seq{oom.Parser, Repeat{oom.Parser}}.Parse(input)
+}
+
+func (oom OneOrMore) Name() string {
+	return "OneOrMore[" + oom.Parser.Name() + "]"
 }
 
 type Opt struct {
@@ -154,6 +207,17 @@ func (o Opt) Parse(input Input) (Input, error) {
 		return input, nil
 	}
 	return rest, nil
+}
+
+func (o Opt) Name() string { return "Opt[" + o.Parser.Name() + "]" }
+
+type Rename struct {
+	Parser
+	NewName string
+}
+
+func (r Rename) Name() string {
+	return r.NewName
 }
 
 type sideEffectParser struct {
@@ -170,6 +234,8 @@ func (sep sideEffectParser) Parse(input Input) (Input, error) {
 	return rest, nil
 }
 
+func (sep sideEffectParser) Name() string { return sep.parser.Name() }
+
 type ParseError struct {
 	Cause   error
 	Message string
@@ -180,14 +246,13 @@ func (p ParseError) Error() string {
 }
 
 var (
-	CanSpace = Repeat{UnicodeClassSpace}
-	CanWS    = Repeat{UnicodeClassWhiteSpace}
-	EOF      = RuneLit(eof)
-	EOS      = Seq{
-		CanSpace,
-		Any{RuneLit(';'), RuneLit('\n')},
-		CanSpace,
+	CanSpace = Rename{Repeat{UnicodeClassSpace}, "CanSpace"}
+	CanWS    = Rename{Repeat{UnicodeClassWhiteSpace}, "CanWS"}
+	EOF      = Rename{RuneLit(eof), "EOF"}
+	EOS      = Rename{
+		Seq{CanSpace, Any{RuneLit(';'), RuneLit('\n')}, CanSpace},
+		"EOS",
 	}
-	Space = OneOrMore{UnicodeClassSpace}
-	WS    = OneOrMore{UnicodeClassWhiteSpace}
+	Space = Rename{OneOrMore{UnicodeClassSpace}, "Space"}
+	WS    = Rename{OneOrMore{UnicodeClassWhiteSpace}, "WS"}
 )
