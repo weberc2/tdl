@@ -1,0 +1,34 @@
+package main
+
+type BinExpr = {
+    Operator (Add () | Sub () | Mul () | Div () | Exp ())
+    Left Column
+    Right Column
+}
+
+type Column = Literal (Number float64 | BoolLit bool | String string)
+    | ColumnName string
+    | Function (Min Column
+        | Max Column
+        | Mean Column
+        | Percentile {Column Column; Percentile int}
+        | Formula BinExpr)
+
+type Comparison = {
+    Operator (Eq () | Ne () | Gt () | Lt () | Ge () | Le ())
+    Left Column
+    Right Column
+}
+
+type BoolExpr = Comparison Comparison
+    | And []BoolExpr
+    | Or []BoolExpr
+    | BoolLit bool
+
+type Query = {
+    Select []Column
+    From (TableName string | Subquery {Query Query; Label string})
+    Where BoolExpr
+    OrderBy []{Column Column; Descending bool}
+    Limit (Int int | Nil ())
+}

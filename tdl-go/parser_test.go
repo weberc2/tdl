@@ -95,6 +95,45 @@ func TestParser(t *testing.T) {
 			wantedError: true,
 		},
 		{
+			name:  "enum-nested",
+			input: "I int | C (I int | S string)",
+			node:  &Enum{},
+			wantedNode: &Enum{
+				Field{Name: "I", Type: TypeIdent("int")},
+				Field{
+					Name: "C",
+					Type: TypeEnum(Enum{
+						Field{Name: "I", Type: TypeIdent("int")},
+						Field{Name: "S", Type: TypeIdent("string")},
+					}),
+				},
+			},
+		},
+		{
+			name:       "tuple-empty",
+			input:      "()",
+			node:       &Tuple{},
+			wantedNode: &Tuple{},
+		},
+		{
+			name:        "tuple-one-elt-fails",
+			input:       "(int)",
+			node:        &Tuple{},
+			wantedError: true,
+		},
+		{
+			name:       "tuple-two-elts",
+			input:      "(int, string)",
+			node:       &Tuple{},
+			wantedNode: &Tuple{TypeIdent("int"), TypeIdent("string")},
+		},
+		{
+			name:       "tuple-three-elts",
+			input:      "(x, y, z)",
+			node:       &Tuple{},
+			wantedNode: &Tuple{TypeIdent("x"), TypeIdent("y"), TypeIdent("z")},
+		},
+		{
 			name:       "struct-empty",
 			input:      "{}",
 			node:       &Struct{},
@@ -118,10 +157,43 @@ func TestParser(t *testing.T) {
 			},
 		},
 		{
+			name:       "struct-ws-padding",
+			input:      "{ Name Ident }",
+			node:       &Struct{},
+			wantedNode: &Struct{Field{Name: "Name", Type: TypeIdent("Ident")}},
+		},
+		{
+			name:  "struct-multiline",
+			input: "{\n\tName Ident\nType Type\n}",
+			node:  &Struct{},
+			wantedNode: &Struct{
+				Field{Name: "Name", Type: TypeIdent("Ident")},
+				Field{Name: "Type", Type: TypeIdent("Type")},
+			},
+		},
+		{
 			name:       "slice",
 			input:      "[]string",
 			node:       &Slice{},
 			wantedNode: &Slice{TypeIdent("string")},
+		},
+		{
+			name:  "type-parens",
+			input: "(I int | S string)",
+			node:  &Type{},
+			wantedNode: nodeType(TypeEnum(Enum{
+				Field{Name: "I", Type: TypeIdent("int")},
+				Field{Name: "S", Type: TypeIdent("string")},
+			})),
+		},
+		{
+			name:  "type-parens-nested",
+			input: "((I int | S string))",
+			node:  &Type{},
+			wantedNode: nodeType(TypeEnum(Enum{
+				Field{Name: "I", Type: TypeIdent("int")},
+				Field{Name: "S", Type: TypeIdent("string")},
+			})),
 		},
 		{
 			name:  "type-decl-simple",

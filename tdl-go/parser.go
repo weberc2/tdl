@@ -99,17 +99,18 @@ func (s *Struct) Parser() Parser {
 			CanWS,
 			Opt{Seq{
 				Repeat{sideEffectParser{
-					Seq{field.Parser(), CanWS, EOS, CanWS},
+					Seq{field.Parser(), EOS},
 					func() {
 						fields = append(fields, field)
 						field = Field{}
 					},
 				}},
-				sideEffectParser{
+				Opt{sideEffectParser{
 					field.Parser(),
 					func() { fields = append(fields, field) },
-				},
+				}},
 			}},
+			CanWS,
 			RuneLit('}'),
 		},
 		func() { *s = Struct(fields) },
@@ -144,6 +145,7 @@ func (t *Tuple) Parser() Parser {
 					// and clear `typ`.
 					func() { types = append(types, typ); typ = Type{} },
 				}},
+				CanWS,
 				// The last element in the tuple. Just like the previous
 				// element(s), it needs to be added to the temp slice after it
 				// is parsed, but because it is the last element, there is no
@@ -212,6 +214,30 @@ func (senp sideEffectNodeParser) Name() string {
 	return senp.node.Parser().Name()
 }
 
+// TODO: Find a better way to handle recursive types. Without this type,
+// Type.Parser() would return `Any{..., Seq{'(', Type.Parser(), ')'}}` which
+// creates an infinite recursion loop that overflows the stack. This type gets
+// around that by deferring the construction of the inner Type.Parser() until
+// parse time. There's probably a general-purpose type that could solve this
+// problem so we don't need to create a special type each time.
+type typeParens struct {
+	typ *Type
+}
+
+func (tp typeParens) Parse(input Input) (Input, error) {
+	return Seq{
+		RuneLit('('),
+		CanWS,
+		tp.typ.Parser(),
+		CanWS,
+		RuneLit(')'),
+	}.Parse(input)
+}
+
+func (tp typeParens) Name() string {
+	return tp.typ.Parser().Name()
+}
+
 func (t *Type) Parser() Parser {
 	var ident Ident
 	var enum Enum
@@ -246,6 +272,7 @@ func (t *Type) Parser() Parser {
 				&ident,
 				func() { *t = TypeIdent(ident) },
 			},
+			typeParens{t},
 		},
 	}
 }

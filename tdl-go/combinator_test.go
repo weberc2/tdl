@@ -112,6 +112,41 @@ func TestCombinator(t *testing.T) {
 			parser:     Opt{RuneLit('a')},
 			wantedRest: "123",
 		},
+		// This test is documentation. UnicodeClassSpace is horizontal
+		// whitespace characters *except* tabs (for some reason). We should
+		// take care not to confuse it with *all* horizontal spaces.
+		{
+			name:        "unicode-class-space-fails-for-tab",
+			input:       "\t",
+			parser:      CanSpace,
+			wantedRest:  "\t",
+			wantedError: true,
+		},
+		{
+			name:   "can-horiz-ws",
+			input:  "\t",
+			parser: CanHorizWS,
+		},
+		{
+			name:   "eos-newline-simple",
+			input:  "x\ny",
+			parser: Seq{RuneLit('x'), EOS, RuneLit('y')},
+		},
+		{
+			name:   "eos-semicolon-simple",
+			input:  "x;y",
+			parser: Seq{RuneLit('x'), EOS, RuneLit('y')},
+		},
+		{
+			name:   "eos-newline-padded-ws",
+			input:  "x\t\n\ty",
+			parser: Seq{RuneLit('x'), EOS, RuneLit('y')},
+		},
+		{
+			name:   "eos-semicolon-padded-ws",
+			input:  "x\t;\ty",
+			parser: Seq{RuneLit('x'), EOS, RuneLit('y')},
+		},
 	}
 
 	for _, testCase := range testCases {

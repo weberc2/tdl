@@ -246,11 +246,15 @@ func (p ParseError) Error() string {
 }
 
 var (
-	CanSpace = Rename{Repeat{UnicodeClassSpace}, "CanSpace"}
-	CanWS    = Rename{Repeat{UnicodeClassWhiteSpace}, "CanWS"}
-	EOF      = Rename{RuneLit(eof), "EOF"}
-	EOS      = Rename{
-		Seq{CanSpace, Any{RuneLit(';'), RuneLit('\n')}, CanSpace},
+	CanSpace   = Rename{Repeat{UnicodeClassSpace}, "CanSpace"}
+	CanHorizWS = Rename{
+		Repeat{Any{RuneLit('\t'), UnicodeClassSpace}},
+		"CanHorizWS",
+	}
+	CanWS = Rename{Repeat{UnicodeClassWhiteSpace}, "CanWS"}
+	EOF   = Rename{RuneLit(eof), "EOF"}
+	EOS   = Rename{
+		Seq{CanHorizWS, Any{RuneLit(';'), RuneLit('\n')}, CanWS},
 		"EOS",
 	}
 	Space = Rename{OneOrMore{UnicodeClassSpace}, "Space"}
