@@ -1,29 +1,16 @@
 README
 ------
 
-Disclaimer: This is all a pre-alpha prototype; it's largely a project for my
-own amusement and utility. As such, I may stop supporting it at any time. Also,
-everything will likely change very quickly. Don't use this for anything
-serious.
+Disclaimer: This is an experiment in code generation; it's largely a project
+for my own amusement and utility. Don't use this in production.
 
-`tdl` is a type description language--a language for describing data types.
-By itself, this isn't very useful, but I think it may have many potential
-metaprogramming applications:
-
-* Generating type definitions for verbose programming languages
-    - Most popular programming languages don't have first class support for sum
-      types, and the workarounds tend to be verbose and/or not typesafe
-* Generating serializers and deserializers
-    - Have a multilingual system? Describe the types with tdl and then generate
-      the implementations in each target language. Guarantee compatibility and
-      avoid tediously keeping redundant type definitions in sync.
-* Generating parsers
-* Generating API server/client stubs (interface description language)
-* Generating validators (e.g., jsonschema)
-    - This is useful for validating the structure of data received over an API,
-      stored in a schemaless database, etc
-* TDL could be a subset of a type system for a new programming language or part
-  of a hygienic macro system for an existing language
+`tdl` is a terse, expressive type description language. For now, I'm using it
+to generate Go boilerplate, which is particularly useful for modeling sum
+types. Besides generating type declarations, `tdl` could also be used to
+generate serializers/deserializers/validators, and not just for Go but for any
+language. This would make it usable as a simplified, expressive alternative for
+protobufs. I'd really like to use it as the type grammar of a ML-like language
+that compiles to Go.
 
 If any of this interests you, drop me a line: weberc2@gmail.com
 
