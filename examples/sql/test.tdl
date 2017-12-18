@@ -1,3 +1,0 @@
-package main
-
-type A = {B (C int | D string)}
