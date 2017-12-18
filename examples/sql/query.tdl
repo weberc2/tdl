@@ -1,21 +1,25 @@
 package main
 
-type BinExpr = {
-    Operator (Add () | Sub () | Mul () | Div () | Exp ())
-    Left Column
-    Right Column
-}
+type FormulaOperator = Add () | Sub () | Mul () | Div () | Exp ()
 
-type Column = Literal (Number float64 | BoolLit bool | String string)
-    | ColumnName string
-    | Function (Min Column
-        | Max Column
-        | Mean Column
-        | Percentile {Column Column; Percentile int}
-        | Formula BinExpr)
+type Function = Min Column
+    | Max Column
+    | Mean Column
+    | Percentile {Column Column; Percentile int}
+    | Formula {
+        Operator FormulaOperator
+        Left Column
+        Right Column
+    }
+
+type Literal = Number float64 | BoolLit bool | String string
+
+type Column = Literal Literal | ColumnName string | Function Function
+
+type ComparisonOperator = Eq () | Ne () | Gt () | Lt () | Ge () | Le ()
 
 type Comparison = {
-    Operator (Eq () | Ne () | Gt () | Lt () | Ge () | Le ())
+    Operator ComparisonOperator
     Left Column
     Right Column
 }
@@ -25,10 +29,15 @@ type BoolExpr = Comparison Comparison
     | Or []BoolExpr
     | BoolLit bool
 
+type Selectable = TableName string | Subquery {Query Query; Label string}
+
+type Limit = Limit int | NoLimit ()
+
 type Query = {
     Select []Column
-    From (TableName string | Subquery {Query Query; Label string})
+    From Selectable
     Where BoolExpr
+    GroupBy []Column
     OrderBy []{Column Column; Descending bool}
-    Limit (Int int | Nil ())
+    Limit Limit
 }
