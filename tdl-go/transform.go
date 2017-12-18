@@ -133,9 +133,24 @@ func (e Enum) GoDecls(name Ident) []GoDecl {
 	return decls
 }
 
+var counter = 0
+var anonEnums = map[string]int{}
+
 func (e Enum) anonName() Ident {
-	s := md5.Sum(e.id())
-	return Ident(hex.EncodeToString(s[:4]))
+	hash := md5.Sum(e.id())
+	s := hex.EncodeToString(hash[:])
+
+	var count int
+	if i, found := anonEnums[s]; found {
+		count = i
+	} else {
+		anonEnums[s] = counter
+		count = counter
+		counter++
+	}
+	return Ident("anonEnum" + strconv.Itoa(count))
+	// s := md5.Sum(e.id())
+	// return Ident("π" + hex.EncodeToString(s[:4]))
 }
 
 func (i Ident) GoType() GoType { return GoTypeIdent(GoIdent(i)) }
@@ -241,7 +256,7 @@ func (t Type) id() []byte {
 }
 
 func (e Enum) Constituents() []Type {
-	var constituents []Type
+	constituents := []Type{TypeEnum(e)}
 	for _, field := range e {
 		constituents = append(constituents, field.Type.Constituents()...)
 	}
