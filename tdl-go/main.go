@@ -17,5 +17,9 @@ func main() {
 	if _, err := file.Parser().Parse(Input{Source: data}); err != nil {
 		log.Fatal(err)
 	}
+	file, err = file.ConcreteDecls()
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println(file.ToGo().Render())
 }

@@ -60,18 +60,18 @@ func TestParser(t *testing.T) {
 			wantedRest: " bar",
 		},
 		{
-			name:       "type-ident",
+			name:       "type-ref",
 			input:      "Foo",
 			node:       &Type{},
-			wantedNode: nodeType(TypeIdent("Foo")),
+			wantedNode: nodeType(TypeRef_(TypeRef{Name: "Foo"})),
 		},
 		{
 			name:  "enum-simple",
 			input: "LeFoo Foo | LeBar Bar",
 			node:  &Enum{},
 			wantedNode: &Enum{
-				Field{"LeFoo", TypeIdent("Foo")},
-				Field{"LeBar", TypeIdent("Bar")},
+				Field{"LeFoo", TypeRef_(TypeRef{Name: "Foo"})},
+				Field{"LeBar", TypeRef_(TypeRef{Name: "Bar"})},
 			},
 		},
 		{
@@ -99,12 +99,18 @@ func TestParser(t *testing.T) {
 			input: "I int | C (I int | S string)",
 			node:  &Enum{},
 			wantedNode: &Enum{
-				Field{Name: "I", Type: TypeIdent("int")},
+				Field{Name: "I", Type: TypeRef_(TypeRef{Name: "int"})},
 				Field{
 					Name: "C",
 					Type: TypeEnum(Enum{
-						Field{Name: "I", Type: TypeIdent("int")},
-						Field{Name: "S", Type: TypeIdent("string")},
+						Field{
+							Name: "I",
+							Type: TypeRef_(TypeRef{Name: "int"}),
+						},
+						Field{
+							Name: "S",
+							Type: TypeRef_(TypeRef{Name: "string"}),
+						},
 					}),
 				},
 			},
@@ -122,16 +128,23 @@ func TestParser(t *testing.T) {
 			wantedError: true,
 		},
 		{
-			name:       "tuple-two-elts",
-			input:      "(int, string)",
-			node:       &Tuple{},
-			wantedNode: &Tuple{TypeIdent("int"), TypeIdent("string")},
+			name:  "tuple-two-elts",
+			input: "(int, string)",
+			node:  &Tuple{},
+			wantedNode: &Tuple{
+				TypeRef_(TypeRef{Name: "int"}),
+				TypeRef_(TypeRef{Name: "string"}),
+			},
 		},
 		{
-			name:       "tuple-three-elts",
-			input:      "(x, y, z)",
-			node:       &Tuple{},
-			wantedNode: &Tuple{TypeIdent("x"), TypeIdent("y"), TypeIdent("z")},
+			name:  "tuple-three-elts",
+			input: "(x, y, z)",
+			node:  &Tuple{},
+			wantedNode: &Tuple{
+				TypeRef_(TypeRef{Name: "x"}),
+				TypeRef_(TypeRef{Name: "y"}),
+				TypeRef_(TypeRef{Name: "z"}),
+			},
 		},
 		{
 			name:       "struct-empty",
@@ -140,11 +153,17 @@ func TestParser(t *testing.T) {
 			wantedNode: &Struct{},
 		},
 		{
+			name:       "struct-empty-multiline",
+			input:      "{\n\t\n}",
+			node:       &Struct{},
+			wantedNode: &Struct{},
+		},
+		{
 			name:  "struct-one-field",
 			input: "{Name Ident}",
 			node:  &Struct{},
 			wantedNode: &Struct{
-				Field{Name: "Name", Type: TypeIdent("Ident")},
+				Field{Name: "Name", Type: TypeRef_(TypeRef{Name: "Ident"})},
 			},
 		},
 		{
@@ -152,38 +171,41 @@ func TestParser(t *testing.T) {
 			input: "{Name Ident; Type Type}",
 			node:  &Struct{},
 			wantedNode: &Struct{
-				Field{Name: "Name", Type: TypeIdent("Ident")},
-				Field{Name: "Type", Type: TypeIdent("Type")},
+				Field{Name: "Name", Type: TypeRef_(TypeRef{Name: "Ident"})},
+				Field{Name: "Type", Type: TypeRef_(TypeRef{Name: "Type"})},
 			},
 		},
 		{
-			name:       "struct-ws-padding",
-			input:      "{ Name Ident }",
-			node:       &Struct{},
-			wantedNode: &Struct{Field{Name: "Name", Type: TypeIdent("Ident")}},
+			name:  "struct-ws-padding",
+			input: "{ Name Ident }",
+			node:  &Struct{},
+			wantedNode: &Struct{Field{
+				Name: "Name",
+				Type: TypeRef_(TypeRef{Name: "Ident"}),
+			}},
 		},
 		{
 			name:  "struct-multiline",
 			input: "{\n\tName Ident\nType Type\n}",
 			node:  &Struct{},
 			wantedNode: &Struct{
-				Field{Name: "Name", Type: TypeIdent("Ident")},
-				Field{Name: "Type", Type: TypeIdent("Type")},
+				Field{Name: "Name", Type: TypeRef_(TypeRef{Name: "Ident"})},
+				Field{Name: "Type", Type: TypeRef_(TypeRef{Name: "Type"})},
 			},
 		},
 		{
 			name:       "slice",
 			input:      "[]string",
 			node:       &Slice{},
-			wantedNode: &Slice{TypeIdent("string")},
+			wantedNode: &Slice{TypeRef_(TypeRef{Name: "string"})},
 		},
 		{
 			name:  "type-parens",
 			input: "(I int | S string)",
 			node:  &Type{},
 			wantedNode: nodeType(TypeEnum(Enum{
-				Field{Name: "I", Type: TypeIdent("int")},
-				Field{Name: "S", Type: TypeIdent("string")},
+				Field{Name: "I", Type: TypeRef_(TypeRef{Name: "int"})},
+				Field{Name: "S", Type: TypeRef_(TypeRef{Name: "string"})},
 			})),
 		},
 		{
@@ -191,18 +213,36 @@ func TestParser(t *testing.T) {
 			input: "((I int | S string))",
 			node:  &Type{},
 			wantedNode: nodeType(TypeEnum(Enum{
-				Field{Name: "I", Type: TypeIdent("int")},
-				Field{Name: "S", Type: TypeIdent("string")},
+				Field{Name: "I", Type: TypeRef_(TypeRef{Name: "int"})},
+				Field{Name: "S", Type: TypeRef_(TypeRef{Name: "string"})},
 			})),
 		},
 		{
 			name:  "type-decl-simple",
 			input: "type Field = {Name Ident; Type Type}",
 			node:  &TypeDecl{},
-			wantedNode: &TypeDecl{Name: "Field", Type: TypeStruct(Struct{
-				Field{Name: "Name", Type: TypeIdent("Ident")},
-				Field{Name: "Type", Type: TypeIdent("Type")},
-			})},
+			wantedNode: &TypeDecl{
+				Ctor: TypeCtor{Name: "Field"},
+				Type: TypeStruct(Struct{
+					Field{
+						Name: "Name",
+						Type: TypeRef_(TypeRef{Name: "Ident"}),
+					},
+					Field{Name: "Type", Type: TypeRef_(TypeRef{Name: "Type"})},
+				}),
+			},
+		},
+		{
+			name:  "type-decl-generic",
+			input: "type Opt[T] = Some T | None ()",
+			node:  &TypeDecl{},
+			wantedNode: &TypeDecl{
+				Ctor: TypeCtor{Name: "Opt", TypeVars: []Ident{"T"}},
+				Type: TypeEnum(Enum{
+					Field{"Some", TypeRef_(TypeRef{Name: "T"})},
+					Field{"None", TypeTuple(Tuple{})},
+				}),
+			},
 		},
 	}
 
@@ -249,5 +289,5 @@ func TestParser(t *testing.T) {
 // Because &Ident("foo") is not legal in Go...
 func nodeIdent(ident Ident) ASTNode { return &ident }
 
-// Because &TypeIdent("foo") is not legal in Go...
+// Because &TypeRef_(TypeRef{Name: "foo"}) is not legal in Go...
 func nodeType(typ Type) ASTNode { return &typ }

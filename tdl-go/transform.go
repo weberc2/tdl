@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"log"
 	"strconv"
 )
 
@@ -188,7 +189,12 @@ func (s Slice) GoType() GoType {
 func (t Type) GoType() GoType {
 	var result GoType
 	t.Match(
-		func(i Ident) { result = GoTypeIdent(GoIdent(i)) },
+		func(tr TypeRef) {
+			if len(tr.Params) > 0 {
+				panic("GoType() on generic type ref")
+			}
+			result = GoTypeIdent(GoIdent(tr.Name))
+		},
 		func(e Enum) { result = GoTypeIdent(GoIdent(e.anonName())) },
 		func(s Struct) { result = s.GoType() },
 		func(t Tuple) { result = t.GoType() },
@@ -206,7 +212,12 @@ func (t Type) GoDecls(name Ident) []GoDecl {
 		return []GoDecl{GoDeclType(GoTypeDecl{GoIdent(name), t.GoType()})}
 	}
 	t.Match(
-		func(i Ident) { result = goDecls(i) },
+		func(tr TypeRef) {
+			if len(tr.Params) > 0 {
+				panic("GoDecls() on generic type ref")
+			}
+			result = goDecls(tr.Name)
+		},
 		func(e Enum) { result = e.GoDecls(name) },
 		func(s Struct) { result = goDecls(s) },
 		func(t Tuple) { result = goDecls(t) },
@@ -245,7 +256,12 @@ func (t Tuple) id() []byte {
 func (t Type) id() []byte {
 	var result []byte
 	t.Match(
-		func(i Ident) { result = append([]byte("ident"), []byte(i)...) },
+		func(tr TypeRef) {
+			if len(tr.Params) > 0 {
+				panic("id() on generic type ref")
+			}
+			result = append([]byte("ident"), []byte(tr.Name)...)
+		},
 		func(e Enum) { result = e.id() },
 		func(s Struct) { result = s.id() },
 		func(t Tuple) { result = t.id() },
@@ -282,7 +298,13 @@ func (t Tuple) Constituents() []Type {
 func (t Type) Constituents() []Type {
 	var result []Type
 	t.Match(
-		func(i Ident) { result = nil },
+		func(tr TypeRef) {
+			if len(tr.Params) > 0 {
+				log.Println(tr)
+				panic("Type.Constituents() on generic type ref")
+			}
+			result = nil
+		},
 		func(e Enum) { result = e.Constituents() },
 		func(s Struct) { result = s.Constituents() },
 		func(t Tuple) { result = t.Constituents() },
@@ -296,7 +318,7 @@ func (td TypeDecl) GoDecls() []GoDecl {
 	var decls []GoDecl
 	for _, constituent := range td.Type.Constituents() {
 		constituent.Match(
-			func(i Ident) {},
+			func(tr TypeRef) {},
 			func(e Enum) { decls = append(decls, e.GoDecls(e.anonName())...) },
 			func(s Struct) {},
 			func(t Tuple) {},
@@ -304,7 +326,7 @@ func (td TypeDecl) GoDecls() []GoDecl {
 			func(s Slice) {},
 		)
 	}
-	return append(decls, td.Type.GoDecls(td.Name)...)
+	return append(decls, td.Type.GoDecls(td.Ctor.Name)...)
 }
 
 func (f File) ToGo() GoFile {

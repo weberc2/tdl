@@ -44,12 +44,28 @@ func (s Slice) Equal(other Slice) bool {
 	return s.Type.Equal(other.Type)
 }
 
+func (tr TypeRef) Equal(other TypeRef) bool {
+	if tr.Name != other.Name || len(tr.Params) != len(other.Params) {
+		return false
+	}
+	for i, param := range tr.Params {
+		if !param.Equal(other.Params[i]) {
+			return false
+		}
+	}
+	return true
+}
+
 func (t Type) Equal(other Type) bool {
+	if t.variant == nil && other.variant == nil {
+		return true
+	}
+
 	var result bool
 	t.Match(
-		func(i Ident) {
+		func(tr TypeRef) {
 			other.Match(
-				func(i2 Ident) { result = i == i2 },
+				func(tr2 TypeRef) { result = tr.Equal(tr2) },
 				func(Enum) { result = false },
 				func(Struct) { result = false },
 				func(Tuple) { result = false },
@@ -59,7 +75,7 @@ func (t Type) Equal(other Type) bool {
 		},
 		func(e Enum) {
 			other.Match(
-				func(Ident) { result = false },
+				func(TypeRef) { result = false },
 				func(e2 Enum) { result = e.Equal(e2) },
 				func(Struct) { result = false },
 				func(Tuple) { result = false },
@@ -69,7 +85,7 @@ func (t Type) Equal(other Type) bool {
 		},
 		func(s Struct) {
 			other.Match(
-				func(Ident) { result = false },
+				func(TypeRef) { result = false },
 				func(Enum) { result = false },
 				func(s2 Struct) { result = s.Equal(s2) },
 				func(Tuple) { result = false },
@@ -79,7 +95,7 @@ func (t Type) Equal(other Type) bool {
 		},
 		func(t Tuple) {
 			other.Match(
-				func(Ident) { result = false },
+				func(TypeRef) { result = false },
 				func(Enum) { result = false },
 				func(Struct) { result = false },
 				func(t2 Tuple) { result = t.Equal(t2) },
@@ -89,7 +105,7 @@ func (t Type) Equal(other Type) bool {
 		},
 		func(p Pointer) {
 			other.Match(
-				func(Ident) { result = false },
+				func(TypeRef) { result = false },
 				func(Enum) { result = false },
 				func(Struct) { result = false },
 				func(Tuple) { result = false },
@@ -99,7 +115,7 @@ func (t Type) Equal(other Type) bool {
 		},
 		func(s Slice) {
 			other.Match(
-				func(Ident) { result = false },
+				func(TypeRef) { result = false },
 				func(Enum) { result = false },
 				func(Struct) { result = false },
 				func(Tuple) { result = false },
@@ -111,8 +127,20 @@ func (t Type) Equal(other Type) bool {
 	return result
 }
 
+func (tc TypeCtor) Equal(other TypeCtor) bool {
+	if tc.Name != other.Name || len(tc.TypeVars) != len(other.TypeVars) {
+		return false
+	}
+	for i, tv := range tc.TypeVars {
+		if tv != other.TypeVars[i] {
+			return false
+		}
+	}
+	return true
+}
+
 func (td TypeDecl) Equal(other TypeDecl) bool {
-	return td.Name == other.Name && td.Type.Equal(other.Type)
+	return td.Ctor.Equal(other.Ctor) && td.Type.Equal(other.Type)
 }
 
 func (f File) Equal(other File) bool {

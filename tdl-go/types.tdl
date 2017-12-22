@@ -14,14 +14,18 @@ type Pointer = {Type Type}
 
 type Slice = {Type Type}
 
-type Type = Ident Ident
+type TypeRef = {Name Ident; Params []Type}
+
+type Type = Ref_ TypeRef
     | Enum Enum
     | Struct Struct
     | Tuple Tuple
     | Pointer Pointer
     | Slice Slice
 
-type TypeDecl = {Name Ident; Type Type}
+type TypeCtor = {Name Ident; TypeVars []Ident}
+
+type TypeDecl = {Ctor TypeCtor; Type Type}
 
 type File = {PackageName Ident; TypeDecls []TypeDecl}
 
@@ -84,3 +88,9 @@ type GoDecl = Type GoTypeDecl | Func GoFuncDecl | Method GoMethodDecl
 type GoComment = string
 
 type GoFile = {FileComment GoComment; PackageName GoIdent; Decls []GoDecl}
+
+type Optional[T] = Some T | None ()
+
+type Foo = Optional[int]
+
+type Bar = int

@@ -238,8 +238,54 @@ func (tp typeParens) Name() string {
 	return tp.typ.Parser().Name()
 }
 
+func (tr *TypeRef) Parser() Parser {
+	// Provision scratch variables so we only update `tr` if parsing succeeds
+	var name Ident
+	var params []Type
+	var currentParam Type
+
+	return sideEffectParser{
+		Seq{
+			&name,
+			Opt{Seq{
+				CanWS,
+				RuneLit('['),
+				Repeat{sideEffectParser{
+					Seq{
+						CanWS,
+						currentParam.Parser(),
+						CanWS,
+						RuneLit(','),
+					},
+					func() { params = append(params, currentParam) },
+				}},
+				CanWS,
+				sideEffectNodeParser{
+					&currentParam,
+					func() { params = append(params, currentParam) },
+				},
+				CanWS,
+				RuneLit(']'),
+			}},
+		},
+
+		// Only update `tr` if parsing succeeded
+		func() {
+			*tr = TypeRef{Name: name, Params: params}
+			name = ""
+			params = []Type{}
+			currentParam = Type{}
+		},
+	}
+}
+
+func (tr *TypeRef) EqualASTNode(other ASTNode) bool {
+	otherTypeRef, ok := other.(*TypeRef)
+	return ok && tr.Equal(*otherTypeRef)
+}
+
 func (t *Type) Parser() Parser {
-	var ident Ident
+	var typeRef TypeRef
 	var enum Enum
 	var struct_ Struct
 	var tuple Tuple
@@ -269,8 +315,8 @@ func (t *Type) Parser() Parser {
 				func() { *t = TypeSlice(slice) },
 			},
 			sideEffectNodeParser{
-				&ident,
-				func() { *t = TypeIdent(ident) },
+				&typeRef,
+				func() { *t = TypeRef_(typeRef) },
 			},
 			typeParens{t},
 		},
@@ -282,21 +328,58 @@ func (t *Type) EqualASTNode(other ASTNode) bool {
 	return ok && t.Equal(*otherType)
 }
 
-func (td *TypeDecl) Parser() Parser {
+func (tc *TypeCtor) Parser() Parser {
 	var typeName Ident
+	var typeArgs []Ident
+	var currentTypeArg Ident
+	return sideEffectParser{
+		Seq{
+			typeName.Parser(),
+			CanWS,
+			Opt{Seq{
+				RuneLit('['),
+				Repeat{sideEffectParser{
+					Seq{
+						CanWS,
+						&currentTypeArg,
+						CanWS,
+						RuneLit(','),
+					},
+					// Only update typeArgs if we get the full `T,`
+					func() { typeArgs = append(typeArgs, currentTypeArg) },
+				}},
+				CanWS,
+				sideEffectNodeParser{
+					&currentTypeArg,
+					func() { typeArgs = append(typeArgs, currentTypeArg) },
+				},
+				RuneLit(']'),
+			}},
+		},
+		func() {
+			*tc = TypeCtor{Name: typeName, TypeVars: typeArgs}
+			typeName = ""
+			typeArgs = nil
+			currentTypeArg = ""
+		},
+	}
+}
+
+func (td *TypeDecl) Parser() Parser {
+	var ctor TypeCtor
 	var typ Type
-	// type IDENT = TYPE
+	// type IDENT[A, B, ..., Z] = TYPE
 	return sideEffectParser{
 		Seq{
 			StringLit("type"),
 			WS,
-			typeName.Parser(),
+			ctor.Parser(),
 			CanWS,
 			RuneLit('='),
 			CanWS,
 			typ.Parser(),
 		},
-		func() { *td = TypeDecl{Name: typeName, Type: typ} },
+		func() { *td = TypeDecl{Ctor: ctor, Type: typ} },
 	}
 }
 
