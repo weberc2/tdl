@@ -17,7 +17,7 @@ func main() {
 	if _, err := file.Parser().Parse(Input{Source: data}); err != nil {
 		log.Fatal(err)
 	}
-	file, err = file.ConcreteDecls()
+	file, err = file.Monomorphize()
 	if err != nil {
 		log.Fatal(err)
 	}

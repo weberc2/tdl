@@ -91,6 +91,8 @@ type GoFile = {FileComment GoComment; PackageName GoIdent; Decls []GoDecl}
 
 type Optional[T] = Some T | None ()
 
-type Foo = Optional[int]
+type List[T] = Cons (T, List[T]) | Nil ()
+
+type Foo = Optional[List[int]]
 
 type Bar = int

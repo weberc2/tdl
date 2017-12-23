@@ -4,6 +4,30 @@ package main
 
 type Ident string
 
+type Field struct{
+    Name Ident
+    Type Type
+}
+
+type Enum []Field
+
+type Struct []Field
+
+type Tuple []Type
+
+type Pointer struct{
+    Type Type
+}
+
+type Slice struct{
+    Type Type
+}
+
+type TypeRef struct{
+    Name Ident
+    Params []Type
+}
+
 type _anonEnum0Variant interface {
     _anonEnum0Variant()
 }
@@ -246,30 +270,6 @@ func (self Type) Match(Ref_ func(π TypeRef), Enum func(π Enum), Struct func(π
     }
 }
 
-type Field struct{
-    Name Ident
-    Type Type
-}
-
-type Enum []Field
-
-type Struct []Field
-
-type Tuple []Type
-
-type Pointer struct{
-    Type Type
-}
-
-type Slice struct{
-    Type Type
-}
-
-type TypeRef struct{
-    Name Ident
-    Params []Type
-}
-
 type TypeCtor struct{
     Name Ident
     TypeVars []Ident
@@ -286,6 +286,86 @@ type File struct{
 }
 
 type GoIdent string
+
+type GoPair struct{
+    Name GoIdent
+    Value GoExpr
+}
+
+type GoCase struct{
+    Expr GoExpr
+    Stmts []GoStmt
+}
+
+type GoTypeSwitch struct{
+    Assignment GoPair
+    Cases []GoCase
+}
+
+type GoField struct{
+    Name GoIdent
+    Type GoType
+}
+
+type GoFuncType struct{
+    Args []GoField
+    Return []GoField
+}
+
+type GoInterfaceField struct{
+    Name GoIdent
+    Signature GoFuncType
+}
+
+type GoMethodSpec struct{
+    Name GoIdent
+    Recv GoType
+    Signature GoFuncType
+}
+
+type GoStruct []GoField
+
+type GoInterface []GoInterfaceField
+
+type GoPointer struct{
+    Type GoType
+}
+
+type GoSlice struct{
+    Type GoType
+}
+
+type GoBlock []GoStmt
+
+type GoIntLit int
+
+type GoStructLit struct{
+    Type GoType
+    Fields []GoPair
+}
+
+type GoCallExpr struct{
+    Fn GoExpr
+    Args []GoExpr
+}
+
+type GoTypeDecl struct{
+    Name GoIdent
+    Type GoType
+}
+
+type GoFuncDecl struct{
+    Name GoIdent
+    Signature GoFuncType
+    Body GoBlock
+}
+
+type GoMethodDecl struct{
+    Signature GoMethodSpec
+    Body GoBlock
+}
+
+type GoReturnStmt []GoExpr
 
 type _anonEnum1Variant interface {
     _anonEnum1Variant()
@@ -309,418 +389,99 @@ func anonEnum1Ident(π GoIdent) anonEnum1 {
 
 func (self _anonEnum1Ident) _anonEnum1Variant() {}
 
-type _anonEnum1IntLit struct{
-    π GoIntLit
+type _anonEnum1Func struct{
+    π GoFuncType
 }
 
-func anonEnum1IntLit(π GoIntLit) anonEnum1 {
+func anonEnum1Func(π GoFuncType) anonEnum1 {
     return anonEnum1 {
-        variant: _anonEnum1IntLit {
+        variant: _anonEnum1Func {
             π: π,
         },
     }
 }
 
-func (self _anonEnum1IntLit) _anonEnum1Variant() {}
+func (self _anonEnum1Func) _anonEnum1Variant() {}
 
-type _anonEnum1StructLit struct{
-    π GoStructLit
+type _anonEnum1Struct struct{
+    π GoStruct
 }
 
-func anonEnum1StructLit(π GoStructLit) anonEnum1 {
+func anonEnum1Struct(π GoStruct) anonEnum1 {
     return anonEnum1 {
-        variant: _anonEnum1StructLit {
+        variant: _anonEnum1Struct {
             π: π,
         },
     }
 }
 
-func (self _anonEnum1StructLit) _anonEnum1Variant() {}
+func (self _anonEnum1Struct) _anonEnum1Variant() {}
 
-type _anonEnum1Call struct{
-    π GoCallExpr
+type _anonEnum1Interface struct{
+    π GoInterface
 }
 
-func anonEnum1Call(π GoCallExpr) anonEnum1 {
+func anonEnum1Interface(π GoInterface) anonEnum1 {
     return anonEnum1 {
-        variant: _anonEnum1Call {
+        variant: _anonEnum1Interface {
             π: π,
         },
     }
 }
 
-func (self _anonEnum1Call) _anonEnum1Variant() {}
+func (self _anonEnum1Interface) _anonEnum1Variant() {}
 
-func (self anonEnum1) Match(Ident func(π GoIdent), IntLit func(π GoIntLit), StructLit func(π GoStructLit), Call func(π GoCallExpr)) {
+type _anonEnum1Pointer struct{
+    π GoPointer
+}
+
+func anonEnum1Pointer(π GoPointer) anonEnum1 {
+    return anonEnum1 {
+        variant: _anonEnum1Pointer {
+            π: π,
+        },
+    }
+}
+
+func (self _anonEnum1Pointer) _anonEnum1Variant() {}
+
+type _anonEnum1Slice struct{
+    π GoSlice
+}
+
+func anonEnum1Slice(π GoSlice) anonEnum1 {
+    return anonEnum1 {
+        variant: _anonEnum1Slice {
+            π: π,
+        },
+    }
+}
+
+func (self _anonEnum1Slice) _anonEnum1Variant() {}
+
+func (self anonEnum1) Match(Ident func(π GoIdent), Func func(π GoFuncType), Struct func(π GoStruct), Interface func(π GoInterface), Pointer func(π GoPointer), Slice func(π GoSlice)) {
     switch π := self.variant.(type) {
     case _anonEnum1Ident:
         Ident(π.π)
         return 
     
-    case _anonEnum1IntLit:
-        IntLit(π.π)
-        return 
-    
-    case _anonEnum1StructLit:
-        StructLit(π.π)
-        return 
-    
-    case _anonEnum1Call:
-        Call(π.π)
-        return 
-    
-    }
-}
-
-type _GoExprVariant interface {
-    _GoExprVariant()
-}
-
-type GoExpr struct{
-    variant _GoExprVariant
-}
-
-type _GoExprIdent struct{
-    π GoIdent
-}
-
-func GoExprIdent(π GoIdent) GoExpr {
-    return GoExpr {
-        variant: _GoExprIdent {
-            π: π,
-        },
-    }
-}
-
-func (self _GoExprIdent) _GoExprVariant() {}
-
-type _GoExprIntLit struct{
-    π GoIntLit
-}
-
-func GoExprIntLit(π GoIntLit) GoExpr {
-    return GoExpr {
-        variant: _GoExprIntLit {
-            π: π,
-        },
-    }
-}
-
-func (self _GoExprIntLit) _GoExprVariant() {}
-
-type _GoExprStructLit struct{
-    π GoStructLit
-}
-
-func GoExprStructLit(π GoStructLit) GoExpr {
-    return GoExpr {
-        variant: _GoExprStructLit {
-            π: π,
-        },
-    }
-}
-
-func (self _GoExprStructLit) _GoExprVariant() {}
-
-type _GoExprCall struct{
-    π GoCallExpr
-}
-
-func GoExprCall(π GoCallExpr) GoExpr {
-    return GoExpr {
-        variant: _GoExprCall {
-            π: π,
-        },
-    }
-}
-
-func (self _GoExprCall) _GoExprVariant() {}
-
-func (self GoExpr) Match(Ident func(π GoIdent), IntLit func(π GoIntLit), StructLit func(π GoStructLit), Call func(π GoCallExpr)) {
-    switch π := self.variant.(type) {
-    case _GoExprIdent:
-        Ident(π.π)
-        return 
-    
-    case _GoExprIntLit:
-        IntLit(π.π)
-        return 
-    
-    case _GoExprStructLit:
-        StructLit(π.π)
-        return 
-    
-    case _GoExprCall:
-        Call(π.π)
-        return 
-    
-    }
-}
-
-type GoPair struct{
-    Name GoIdent
-    Value GoExpr
-}
-
-type _anonEnum2Variant interface {
-    _anonEnum2Variant()
-}
-
-type anonEnum2 struct{
-    variant _anonEnum2Variant
-}
-
-type _anonEnum2Expr struct{
-    π GoExpr
-}
-
-func anonEnum2Expr(π GoExpr) anonEnum2 {
-    return anonEnum2 {
-        variant: _anonEnum2Expr {
-            π: π,
-        },
-    }
-}
-
-func (self _anonEnum2Expr) _anonEnum2Variant() {}
-
-type _anonEnum2Return struct{
-    π GoReturnStmt
-}
-
-func anonEnum2Return(π GoReturnStmt) anonEnum2 {
-    return anonEnum2 {
-        variant: _anonEnum2Return {
-            π: π,
-        },
-    }
-}
-
-func (self _anonEnum2Return) _anonEnum2Variant() {}
-
-type _anonEnum2TypeSwitch struct{
-    π GoTypeSwitch
-}
-
-func anonEnum2TypeSwitch(π GoTypeSwitch) anonEnum2 {
-    return anonEnum2 {
-        variant: _anonEnum2TypeSwitch {
-            π: π,
-        },
-    }
-}
-
-func (self _anonEnum2TypeSwitch) _anonEnum2Variant() {}
-
-func (self anonEnum2) Match(Expr func(π GoExpr), Return func(π GoReturnStmt), TypeSwitch func(π GoTypeSwitch)) {
-    switch π := self.variant.(type) {
-    case _anonEnum2Expr:
-        Expr(π.π)
-        return 
-    
-    case _anonEnum2Return:
-        Return(π.π)
-        return 
-    
-    case _anonEnum2TypeSwitch:
-        TypeSwitch(π.π)
-        return 
-    
-    }
-}
-
-type _GoStmtVariant interface {
-    _GoStmtVariant()
-}
-
-type GoStmt struct{
-    variant _GoStmtVariant
-}
-
-type _GoStmtExpr struct{
-    π GoExpr
-}
-
-func GoStmtExpr(π GoExpr) GoStmt {
-    return GoStmt {
-        variant: _GoStmtExpr {
-            π: π,
-        },
-    }
-}
-
-func (self _GoStmtExpr) _GoStmtVariant() {}
-
-type _GoStmtReturn struct{
-    π GoReturnStmt
-}
-
-func GoStmtReturn(π GoReturnStmt) GoStmt {
-    return GoStmt {
-        variant: _GoStmtReturn {
-            π: π,
-        },
-    }
-}
-
-func (self _GoStmtReturn) _GoStmtVariant() {}
-
-type _GoStmtTypeSwitch struct{
-    π GoTypeSwitch
-}
-
-func GoStmtTypeSwitch(π GoTypeSwitch) GoStmt {
-    return GoStmt {
-        variant: _GoStmtTypeSwitch {
-            π: π,
-        },
-    }
-}
-
-func (self _GoStmtTypeSwitch) _GoStmtVariant() {}
-
-func (self GoStmt) Match(Expr func(π GoExpr), Return func(π GoReturnStmt), TypeSwitch func(π GoTypeSwitch)) {
-    switch π := self.variant.(type) {
-    case _GoStmtExpr:
-        Expr(π.π)
-        return 
-    
-    case _GoStmtReturn:
-        Return(π.π)
-        return 
-    
-    case _GoStmtTypeSwitch:
-        TypeSwitch(π.π)
-        return 
-    
-    }
-}
-
-type GoCase struct{
-    Expr GoExpr
-    Stmts []GoStmt
-}
-
-type GoTypeSwitch struct{
-    Assignment GoPair
-    Cases []GoCase
-}
-
-type _anonEnum3Variant interface {
-    _anonEnum3Variant()
-}
-
-type anonEnum3 struct{
-    variant _anonEnum3Variant
-}
-
-type _anonEnum3Ident struct{
-    π GoIdent
-}
-
-func anonEnum3Ident(π GoIdent) anonEnum3 {
-    return anonEnum3 {
-        variant: _anonEnum3Ident {
-            π: π,
-        },
-    }
-}
-
-func (self _anonEnum3Ident) _anonEnum3Variant() {}
-
-type _anonEnum3Func struct{
-    π GoFuncType
-}
-
-func anonEnum3Func(π GoFuncType) anonEnum3 {
-    return anonEnum3 {
-        variant: _anonEnum3Func {
-            π: π,
-        },
-    }
-}
-
-func (self _anonEnum3Func) _anonEnum3Variant() {}
-
-type _anonEnum3Struct struct{
-    π GoStruct
-}
-
-func anonEnum3Struct(π GoStruct) anonEnum3 {
-    return anonEnum3 {
-        variant: _anonEnum3Struct {
-            π: π,
-        },
-    }
-}
-
-func (self _anonEnum3Struct) _anonEnum3Variant() {}
-
-type _anonEnum3Interface struct{
-    π GoInterface
-}
-
-func anonEnum3Interface(π GoInterface) anonEnum3 {
-    return anonEnum3 {
-        variant: _anonEnum3Interface {
-            π: π,
-        },
-    }
-}
-
-func (self _anonEnum3Interface) _anonEnum3Variant() {}
-
-type _anonEnum3Pointer struct{
-    π GoPointer
-}
-
-func anonEnum3Pointer(π GoPointer) anonEnum3 {
-    return anonEnum3 {
-        variant: _anonEnum3Pointer {
-            π: π,
-        },
-    }
-}
-
-func (self _anonEnum3Pointer) _anonEnum3Variant() {}
-
-type _anonEnum3Slice struct{
-    π GoSlice
-}
-
-func anonEnum3Slice(π GoSlice) anonEnum3 {
-    return anonEnum3 {
-        variant: _anonEnum3Slice {
-            π: π,
-        },
-    }
-}
-
-func (self _anonEnum3Slice) _anonEnum3Variant() {}
-
-func (self anonEnum3) Match(Ident func(π GoIdent), Func func(π GoFuncType), Struct func(π GoStruct), Interface func(π GoInterface), Pointer func(π GoPointer), Slice func(π GoSlice)) {
-    switch π := self.variant.(type) {
-    case _anonEnum3Ident:
-        Ident(π.π)
-        return 
-    
-    case _anonEnum3Func:
+    case _anonEnum1Func:
         Func(π.π)
         return 
     
-    case _anonEnum3Struct:
+    case _anonEnum1Struct:
         Struct(π.π)
         return 
     
-    case _anonEnum3Interface:
+    case _anonEnum1Interface:
         Interface(π.π)
         return 
     
-    case _anonEnum3Pointer:
+    case _anonEnum1Pointer:
         Pointer(π.π)
         return 
     
-    case _anonEnum3Slice:
+    case _anonEnum1Slice:
         Slice(π.π)
         return 
     
@@ -848,70 +609,309 @@ func (self GoType) Match(Ident func(π GoIdent), Func func(π GoFuncType), Struc
     }
 }
 
-type GoField struct{
-    Name GoIdent
-    Type GoType
+type _anonEnum2Variant interface {
+    _anonEnum2Variant()
 }
 
-type GoFuncType struct{
-    Args []GoField
-    Return []GoField
+type anonEnum2 struct{
+    variant _anonEnum2Variant
 }
 
-type GoInterfaceField struct{
-    Name GoIdent
-    Signature GoFuncType
+type _anonEnum2Ident struct{
+    π GoIdent
 }
 
-type GoMethodSpec struct{
-    Name GoIdent
-    Recv GoType
-    Signature GoFuncType
+func anonEnum2Ident(π GoIdent) anonEnum2 {
+    return anonEnum2 {
+        variant: _anonEnum2Ident {
+            π: π,
+        },
+    }
 }
 
-type GoStruct []GoField
+func (self _anonEnum2Ident) _anonEnum2Variant() {}
 
-type GoInterface []GoInterfaceField
-
-type GoPointer struct{
-    Type GoType
+type _anonEnum2IntLit struct{
+    π GoIntLit
 }
 
-type GoSlice struct{
-    Type GoType
+func anonEnum2IntLit(π GoIntLit) anonEnum2 {
+    return anonEnum2 {
+        variant: _anonEnum2IntLit {
+            π: π,
+        },
+    }
 }
 
-type GoBlock []GoStmt
+func (self _anonEnum2IntLit) _anonEnum2Variant() {}
 
-type GoIntLit int
-
-type GoStructLit struct{
-    Type GoType
-    Fields []GoPair
+type _anonEnum2StructLit struct{
+    π GoStructLit
 }
 
-type GoCallExpr struct{
-    Fn GoExpr
-    Args []GoExpr
+func anonEnum2StructLit(π GoStructLit) anonEnum2 {
+    return anonEnum2 {
+        variant: _anonEnum2StructLit {
+            π: π,
+        },
+    }
 }
 
-type GoTypeDecl struct{
-    Name GoIdent
-    Type GoType
+func (self _anonEnum2StructLit) _anonEnum2Variant() {}
+
+type _anonEnum2Call struct{
+    π GoCallExpr
 }
 
-type GoFuncDecl struct{
-    Name GoIdent
-    Signature GoFuncType
-    Body GoBlock
+func anonEnum2Call(π GoCallExpr) anonEnum2 {
+    return anonEnum2 {
+        variant: _anonEnum2Call {
+            π: π,
+        },
+    }
 }
 
-type GoMethodDecl struct{
-    Signature GoMethodSpec
-    Body GoBlock
+func (self _anonEnum2Call) _anonEnum2Variant() {}
+
+func (self anonEnum2) Match(Ident func(π GoIdent), IntLit func(π GoIntLit), StructLit func(π GoStructLit), Call func(π GoCallExpr)) {
+    switch π := self.variant.(type) {
+    case _anonEnum2Ident:
+        Ident(π.π)
+        return 
+    
+    case _anonEnum2IntLit:
+        IntLit(π.π)
+        return 
+    
+    case _anonEnum2StructLit:
+        StructLit(π.π)
+        return 
+    
+    case _anonEnum2Call:
+        Call(π.π)
+        return 
+    
+    }
 }
 
-type GoReturnStmt []GoExpr
+type _GoExprVariant interface {
+    _GoExprVariant()
+}
+
+type GoExpr struct{
+    variant _GoExprVariant
+}
+
+type _GoExprIdent struct{
+    π GoIdent
+}
+
+func GoExprIdent(π GoIdent) GoExpr {
+    return GoExpr {
+        variant: _GoExprIdent {
+            π: π,
+        },
+    }
+}
+
+func (self _GoExprIdent) _GoExprVariant() {}
+
+type _GoExprIntLit struct{
+    π GoIntLit
+}
+
+func GoExprIntLit(π GoIntLit) GoExpr {
+    return GoExpr {
+        variant: _GoExprIntLit {
+            π: π,
+        },
+    }
+}
+
+func (self _GoExprIntLit) _GoExprVariant() {}
+
+type _GoExprStructLit struct{
+    π GoStructLit
+}
+
+func GoExprStructLit(π GoStructLit) GoExpr {
+    return GoExpr {
+        variant: _GoExprStructLit {
+            π: π,
+        },
+    }
+}
+
+func (self _GoExprStructLit) _GoExprVariant() {}
+
+type _GoExprCall struct{
+    π GoCallExpr
+}
+
+func GoExprCall(π GoCallExpr) GoExpr {
+    return GoExpr {
+        variant: _GoExprCall {
+            π: π,
+        },
+    }
+}
+
+func (self _GoExprCall) _GoExprVariant() {}
+
+func (self GoExpr) Match(Ident func(π GoIdent), IntLit func(π GoIntLit), StructLit func(π GoStructLit), Call func(π GoCallExpr)) {
+    switch π := self.variant.(type) {
+    case _GoExprIdent:
+        Ident(π.π)
+        return 
+    
+    case _GoExprIntLit:
+        IntLit(π.π)
+        return 
+    
+    case _GoExprStructLit:
+        StructLit(π.π)
+        return 
+    
+    case _GoExprCall:
+        Call(π.π)
+        return 
+    
+    }
+}
+
+type _anonEnum3Variant interface {
+    _anonEnum3Variant()
+}
+
+type anonEnum3 struct{
+    variant _anonEnum3Variant
+}
+
+type _anonEnum3Expr struct{
+    π GoExpr
+}
+
+func anonEnum3Expr(π GoExpr) anonEnum3 {
+    return anonEnum3 {
+        variant: _anonEnum3Expr {
+            π: π,
+        },
+    }
+}
+
+func (self _anonEnum3Expr) _anonEnum3Variant() {}
+
+type _anonEnum3Return struct{
+    π GoReturnStmt
+}
+
+func anonEnum3Return(π GoReturnStmt) anonEnum3 {
+    return anonEnum3 {
+        variant: _anonEnum3Return {
+            π: π,
+        },
+    }
+}
+
+func (self _anonEnum3Return) _anonEnum3Variant() {}
+
+type _anonEnum3TypeSwitch struct{
+    π GoTypeSwitch
+}
+
+func anonEnum3TypeSwitch(π GoTypeSwitch) anonEnum3 {
+    return anonEnum3 {
+        variant: _anonEnum3TypeSwitch {
+            π: π,
+        },
+    }
+}
+
+func (self _anonEnum3TypeSwitch) _anonEnum3Variant() {}
+
+func (self anonEnum3) Match(Expr func(π GoExpr), Return func(π GoReturnStmt), TypeSwitch func(π GoTypeSwitch)) {
+    switch π := self.variant.(type) {
+    case _anonEnum3Expr:
+        Expr(π.π)
+        return 
+    
+    case _anonEnum3Return:
+        Return(π.π)
+        return 
+    
+    case _anonEnum3TypeSwitch:
+        TypeSwitch(π.π)
+        return 
+    
+    }
+}
+
+type _GoStmtVariant interface {
+    _GoStmtVariant()
+}
+
+type GoStmt struct{
+    variant _GoStmtVariant
+}
+
+type _GoStmtExpr struct{
+    π GoExpr
+}
+
+func GoStmtExpr(π GoExpr) GoStmt {
+    return GoStmt {
+        variant: _GoStmtExpr {
+            π: π,
+        },
+    }
+}
+
+func (self _GoStmtExpr) _GoStmtVariant() {}
+
+type _GoStmtReturn struct{
+    π GoReturnStmt
+}
+
+func GoStmtReturn(π GoReturnStmt) GoStmt {
+    return GoStmt {
+        variant: _GoStmtReturn {
+            π: π,
+        },
+    }
+}
+
+func (self _GoStmtReturn) _GoStmtVariant() {}
+
+type _GoStmtTypeSwitch struct{
+    π GoTypeSwitch
+}
+
+func GoStmtTypeSwitch(π GoTypeSwitch) GoStmt {
+    return GoStmt {
+        variant: _GoStmtTypeSwitch {
+            π: π,
+        },
+    }
+}
+
+func (self _GoStmtTypeSwitch) _GoStmtVariant() {}
+
+func (self GoStmt) Match(Expr func(π GoExpr), Return func(π GoReturnStmt), TypeSwitch func(π GoTypeSwitch)) {
+    switch π := self.variant.(type) {
+    case _GoStmtExpr:
+        Expr(π.π)
+        return 
+    
+    case _GoStmtReturn:
+        Return(π.π)
+        return 
+    
+    case _GoStmtTypeSwitch:
+        TypeSwitch(π.π)
+        return 
+    
+    }
+}
 
 type _anonEnum4Variant interface {
     _anonEnum4Variant()
@@ -1055,8 +1055,220 @@ type GoFile struct{
     Decls []GoDecl
 }
 
-type Optionalᐸintᐳ int
-
-type Foo Optionalᐸintᐳ
+type Foo OptionalᐸListᐸintᐳᐳ
 
 type Bar int
+
+type _anonEnum5Variant interface {
+    _anonEnum5Variant()
+}
+
+type anonEnum5 struct{
+    variant _anonEnum5Variant
+}
+
+type _anonEnum5Cons struct{
+    π struct{
+        _0 int
+        _1 Listᐸintᐳ
+    }
+}
+
+func anonEnum5Cons(π struct{
+    _0 int
+    _1 Listᐸintᐳ
+}) anonEnum5 {
+    return anonEnum5 {
+        variant: _anonEnum5Cons {
+            π: π,
+        },
+    }
+}
+
+func (self _anonEnum5Cons) _anonEnum5Variant() {}
+
+type _anonEnum5Nil struct{
+    π struct{}
+}
+
+func anonEnum5Nil(π struct{}) anonEnum5 {
+    return anonEnum5 {
+        variant: _anonEnum5Nil {
+            π: π,
+        },
+    }
+}
+
+func (self _anonEnum5Nil) _anonEnum5Variant() {}
+
+func (self anonEnum5) Match(Cons func(π struct{
+    _0 int
+    _1 Listᐸintᐳ
+}), Nil func(π struct{})) {
+    switch π := self.variant.(type) {
+    case _anonEnum5Cons:
+        Cons(π.π)
+        return 
+    
+    case _anonEnum5Nil:
+        Nil(π.π)
+        return 
+    
+    }
+}
+
+type _ListᐸintᐳVariant interface {
+    _ListᐸintᐳVariant()
+}
+
+type Listᐸintᐳ struct{
+    variant _ListᐸintᐳVariant
+}
+
+type _ListᐸintᐳCons struct{
+    π struct{
+        _0 int
+        _1 Listᐸintᐳ
+    }
+}
+
+func ListᐸintᐳCons(π struct{
+    _0 int
+    _1 Listᐸintᐳ
+}) Listᐸintᐳ {
+    return Listᐸintᐳ {
+        variant: _ListᐸintᐳCons {
+            π: π,
+        },
+    }
+}
+
+func (self _ListᐸintᐳCons) _ListᐸintᐳVariant() {}
+
+type _ListᐸintᐳNil struct{
+    π struct{}
+}
+
+func ListᐸintᐳNil(π struct{}) Listᐸintᐳ {
+    return Listᐸintᐳ {
+        variant: _ListᐸintᐳNil {
+            π: π,
+        },
+    }
+}
+
+func (self _ListᐸintᐳNil) _ListᐸintᐳVariant() {}
+
+func (self Listᐸintᐳ) Match(Cons func(π struct{
+    _0 int
+    _1 Listᐸintᐳ
+}), Nil func(π struct{})) {
+    switch π := self.variant.(type) {
+    case _ListᐸintᐳCons:
+        Cons(π.π)
+        return 
+    
+    case _ListᐸintᐳNil:
+        Nil(π.π)
+        return 
+    
+    }
+}
+
+type _anonEnum6Variant interface {
+    _anonEnum6Variant()
+}
+
+type anonEnum6 struct{
+    variant _anonEnum6Variant
+}
+
+type _anonEnum6Some struct{
+    π Listᐸintᐳ
+}
+
+func anonEnum6Some(π Listᐸintᐳ) anonEnum6 {
+    return anonEnum6 {
+        variant: _anonEnum6Some {
+            π: π,
+        },
+    }
+}
+
+func (self _anonEnum6Some) _anonEnum6Variant() {}
+
+type _anonEnum6None struct{
+    π struct{}
+}
+
+func anonEnum6None(π struct{}) anonEnum6 {
+    return anonEnum6 {
+        variant: _anonEnum6None {
+            π: π,
+        },
+    }
+}
+
+func (self _anonEnum6None) _anonEnum6Variant() {}
+
+func (self anonEnum6) Match(Some func(π Listᐸintᐳ), None func(π struct{})) {
+    switch π := self.variant.(type) {
+    case _anonEnum6Some:
+        Some(π.π)
+        return 
+    
+    case _anonEnum6None:
+        None(π.π)
+        return 
+    
+    }
+}
+
+type _OptionalᐸListᐸintᐳᐳVariant interface {
+    _OptionalᐸListᐸintᐳᐳVariant()
+}
+
+type OptionalᐸListᐸintᐳᐳ struct{
+    variant _OptionalᐸListᐸintᐳᐳVariant
+}
+
+type _OptionalᐸListᐸintᐳᐳSome struct{
+    π Listᐸintᐳ
+}
+
+func OptionalᐸListᐸintᐳᐳSome(π Listᐸintᐳ) OptionalᐸListᐸintᐳᐳ {
+    return OptionalᐸListᐸintᐳᐳ {
+        variant: _OptionalᐸListᐸintᐳᐳSome {
+            π: π,
+        },
+    }
+}
+
+func (self _OptionalᐸListᐸintᐳᐳSome) _OptionalᐸListᐸintᐳᐳVariant() {}
+
+type _OptionalᐸListᐸintᐳᐳNone struct{
+    π struct{}
+}
+
+func OptionalᐸListᐸintᐳᐳNone(π struct{}) OptionalᐸListᐸintᐳᐳ {
+    return OptionalᐸListᐸintᐳᐳ {
+        variant: _OptionalᐸListᐸintᐳᐳNone {
+            π: π,
+        },
+    }
+}
+
+func (self _OptionalᐸListᐸintᐳᐳNone) _OptionalᐸListᐸintᐳᐳVariant() {}
+
+func (self OptionalᐸListᐸintᐳᐳ) Match(Some func(π Listᐸintᐳ), None func(π struct{})) {
+    switch π := self.variant.(type) {
+    case _OptionalᐸListᐸintᐳᐳSome:
+        Some(π.π)
+        return 
+    
+    case _OptionalᐸListᐸintᐳᐳNone:
+        None(π.π)
+        return 
+    
+    }
+}
